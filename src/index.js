@@ -31,6 +31,13 @@ export const createAction = type => {
 
 export const createActions = createActionsBuilder(createAction)
 
+export const bindActionCreators = (actions, dispatch) =>
+  actions.reduce((acc, key) => {
+    acc[key] = createBoundAction({ dispatch })(String(actions[key]))
+
+    return acc
+  }, {})
+
 export default function(store) {
   const boundCreate = createBoundAction(store)
   const boundCreateMultiple = createActionsBuilder(boundCreate)
@@ -41,3 +48,4 @@ export default function(store) {
     createReducer,
   }
 }
+
