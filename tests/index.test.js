@@ -1,4 +1,9 @@
-import bindUtils from '../src/'
+import {
+  bindDispatcher,
+  createAction,
+  createActions,
+  createReducer,
+} from '../src/'
 
 const store = {
   state: undefined,
@@ -8,7 +13,7 @@ const store = {
   },
 }
 
-const { createAction, createActions, createReducer } = bindUtils(store)
+bindDispatcher(store)
 
 const testAction = createAction('boom')
 const dirtyAction = createAction('bad boy')

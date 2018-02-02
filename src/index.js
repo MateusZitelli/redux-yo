@@ -1,4 +1,35 @@
-export const createReducer = (handlers = {}, defaultState) => (
+const dispatcher = {
+  dispatch: value => value,
+}
+
+export const bindDispatcher = store => {
+  dispatcher.dispatch = store.dispatch.bind(store)
+}
+
+export const createAction = type => {
+  const action = payload => dispatcher.dispatch({ type, payload })
+  action.toString = () => type
+  action.isReduxAction = true
+
+  return action
+}
+
+export const createActions = (labels, prefix) =>
+  labels.reduce((acc, label) => ({
+    ...acc,
+    [label]: createAction(prefix ? `${prefix}/${label}` : label),
+  }), {})
+
+export const bindActionCreators = actions =>
+  Object.entries(actions).reduce((acc, [key, value]) => {
+    const type = value.isReduxAction ? String(value) : value().type
+
+    acc[key] = createAction(type)
+
+    return acc
+  }, {})
+
+export const createReducer = (handlers = {}, defaultState) =>
   (state = defaultState, { type, payload }) => {
     if (type && handlers[type]) {
       const newState = handlers[type](state, payload)
@@ -7,45 +38,4 @@ export const createReducer = (handlers = {}, defaultState) => (
 
     return state
   }
-)
-
-export const createBoundAction = store => type => {
-  const action = payload => store.dispatch({ type, payload })
-  action.toString = () => type
-
-  return action
-}
-
-export const createActionsBuilder = create => (labels, prefix) =>
-  labels.reduce((acc, label) => ({
-    ...acc,
-    [label]: create(prefix ? `${prefix}/${label}` : label),
-  }), {})
-
-export const createAction = type => {
-  const action = payload => ({ type, payload })
-  action.toString = () => type
-
-  return action
-}
-
-export const createActions = createActionsBuilder(createAction)
-
-export const bindActionCreators = (actions, dispatch) =>
-  Object.keys(actions).reduce((acc, key) => {
-    acc[key] = createBoundAction({ dispatch })(String(actions[key]))
-
-    return acc
-  }, {})
-
-export default function(store) {
-  const boundCreate = createBoundAction(store)
-  const boundCreateMultiple = createActionsBuilder(boundCreate)
-
-  return {
-    createAction: boundCreate,
-    createActions: boundCreateMultiple,
-    createReducer,
-  }
-}
 
