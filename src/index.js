@@ -1,11 +1,15 @@
-export const createAction = type => {
-  const action = payload => ({ type, payload })
-
+export const addMetaData = (action, type) => {
   action.type = type
   action.toString = () => type
   action.isReduxAction = true
 
   return action
+}
+
+export const createAction = type => {
+  const action = payload => ({ type, payload })
+
+  return addMetaData(action, type)
 }
 
 export const createActions = (labels, prefix) =>
@@ -23,3 +27,22 @@ export const createReducer = (handlers = {}, defaultState) =>
 
     return state
   }
+
+
+export const bindActionCreator = (action, dispatch) => {
+  const boundAction = (...args) => dispatch(action(...args))
+
+  return addMetaData(boundAction, action().type)
+}
+
+export const bindActionCreators = (actions, dispatch) => {
+  if (typeof actions === 'function') {
+    return bindActionCreator(actions, dispatch)
+  }
+
+  return Object.entries(actions).reduce((acc, [label, action]) => {
+    acc[label] = bindActionCreator(action, dispatch)
+
+    return acc
+  }, {})
+}
