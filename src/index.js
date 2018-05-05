@@ -1,13 +1,7 @@
-const dispatcher = {
-  dispatch: value => value,
-}
-
-export const bindDispatcher = store => {
-  dispatcher.dispatch = store.dispatch.bind(store)
-}
-
 export const createAction = type => {
-  const action = payload => dispatcher.dispatch({ type, payload })
+  const action = payload => ({ type, payload })
+
+  action.type = type
   action.toString = () => type
   action.isReduxAction = true
 
@@ -20,15 +14,6 @@ export const createActions = (labels, prefix) =>
     [label]: createAction(prefix ? `${prefix}/${label}` : label),
   }), {})
 
-export const bindActionCreators = actions =>
-  Object.entries(actions).reduce((acc, [key, value]) => {
-    const type = value.isReduxAction ? String(value) : value().type
-
-    acc[key] = createAction(type)
-
-    return acc
-  }, {})
-
 export const createReducer = (handlers = {}, defaultState) =>
   (state = defaultState, { type, payload }) => {
     if (type && handlers[type]) {
@@ -38,4 +23,3 @@ export const createReducer = (handlers = {}, defaultState) =>
 
     return state
   }
-

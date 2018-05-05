@@ -1,5 +1,4 @@
 import {
-  bindDispatcher,
   createAction,
   createActions,
   createReducer,
@@ -13,10 +12,8 @@ const store = {
   },
 }
 
-bindDispatcher(store)
-
-const testAction = createAction('boom')
-const dirtyAction = createAction('bad boy')
+const testAction = createAction('foo')
+const dirtyAction = createAction('bad')
 
 const actions = createActions([
   'add',
@@ -55,8 +52,8 @@ store.reducer = createReducer({
 }, initialState)
 
 describe('Basic utils', () => {
-  test('Initial state form reducer', () => {
-    actions.withoutHandler()
+  test('Initial state reducer', () => {
+    store.dispatch(actions.withoutHandler())
 
     expect(store.state).toEqual(initialState)
   })
@@ -67,12 +64,12 @@ describe('Basic utils', () => {
     expect(prefixedActions.delete().type).toEqual('users/delete')
   })
 
-  test('Actions are binded to store', () => {
+  test('Actions work with reducer', () => {
     const userInput = 'user input'
 
-    testAction(userInput)
-    actions.toggle()
-    actions.add(userInput)
+    store.dispatch(testAction(userInput))
+    store.dispatch(actions.toggle())
+    store.dispatch(actions.add(userInput))
 
     expect(store.state.input).toEqual(userInput)
     expect(store.state.boolean).toEqual(false)
@@ -81,7 +78,7 @@ describe('Basic utils', () => {
 
   test('Not pure reducer works', () => {
     const omg = 'I wanna be a string'
-    dirtyAction(omg)
+    store.dispatch(dirtyAction(omg))
 
     expect(store.state.modifyMe.omg).toEqual(omg)
   })
