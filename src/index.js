@@ -7,21 +7,26 @@ export const addMetaData = (action, type) => {
 }
 
 export const createAction = type => {
-  const action = payload => ({ type, payload })
+  const action = (payload, meta) => ({ type, payload, meta })
 
   return addMetaData(action, type)
 }
 
-export const createActions = (labels, prefix) =>
+export const createActions = (labels, prefix) => (
   labels.reduce((acc, label) => ({
     ...acc,
     [label]: createAction(prefix ? `${prefix}/${label}` : label),
   }), {})
+)
+
+export const promisifyAction = (action, payload) => (
+  new Promise((resolve, reject) => action(payload, { resolve, reject }))
+)
 
 export const createReducer = (handlers = {}, defaultState) =>
-  (state = defaultState, { type, payload }) => {
+  (state = defaultState, { type, payload, meta }) => {
     if (type && handlers[type]) {
-      const newState = handlers[type](state, payload)
+      const newState = handlers[type](state, payload, meta)
       return newState || state
     }
 
