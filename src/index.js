@@ -27,7 +27,7 @@ export const createReducer = (handlers = {}, defaultState) =>
   (state = defaultState, { type, payload, meta }) => {
     if (type && handlers[type]) {
       const newState = handlers[type](state, payload, meta)
-      return newState || state
+      return typeof newState === 'undefined' ? state : newState;
     }
 
     return state
